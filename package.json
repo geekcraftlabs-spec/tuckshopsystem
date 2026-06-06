@@ -1,0 +1,25 @@
+{
+  "name": "ghs-tuckshop",
+  "version": "1.0.0",
+  "description": "GHS Tuckshop Online Ordering System",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "keywords": ["tuckshop", "school", "ordering", "yoco"],
+  "author": "Geek Craft Labs",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "body-parser": "^2.2.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "mongodb": "^7.1.0",
+    "mongoose": "^9.1.2",
+    "node-cron": "^4.2.1",
+    "nodemailer": "^7.0.12",
+    "nodemon": "^3.1.11"
+  }
+}

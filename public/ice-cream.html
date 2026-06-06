@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GHS Tuckshop - Ice Creams</title>
+
+  <!-- Google Fonts: Bubblegum Sans + Poppins -->
+  <link href="https://fonts.googleapis.com/css2?family=Bubblegum+Sans&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Flatpickr for calendar later (if needed) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+  <style>
+    body { 
+      background-color: #f8f9fa; 
+    }
+
+    /* ── FIXED TOP NAVIGATION BAR ────────────────────────────────────────── */
+    header {
+      background-color: #000000;
+      position: relative;
+      text-align: center;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.5);
+    }
+
+    .brand-container {
+      text-align: center;
+      padding: 12px 0 6px;
+    }
+
+    .main-title {
+      font-family: 'Bubblegum Sans', sans-serif;
+      font-size: 2.6rem;
+      color: #ffffff;
+      margin: 0;
+      text-shadow: 1px 1px 4px rgba(0,0,0,0.6);
+    }
+
+    .sub-title {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.8rem;
+      color: #cccccc;
+      margin: 2px 0 0;
+      font-weight: 500;
+    }
+
+    .navbar {
+      background-color: #111111;
+      padding: 10px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .navbar-nav {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      flex-wrap: wrap;
+    }
+
+    .nav-item {
+      margin: 0 16px;
+    }
+
+    .nav-link {
+      color: #ffffff;
+      font-size: 1.05rem;
+      font-family: 'Poppins', sans-serif;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .nav-link:hover {
+      color: #bbbbbb;
+    }
+
+    /* Mobile adjustments */
+    @media (max-width: 768px) {
+      .main-title {
+        font-size: 2.1rem;
+      }
+      .sub-title {
+        font-size: 1.5rem;
+      }
+      .navbar {
+        padding: 6px 0;
+      }
+      .nav-item {
+        margin: 6px 12px;
+      }
+      .nav-link {
+        font-size: 0.98rem;
+      }
+      body {
+        padding-top: 0px;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .main-title {
+        font-size: 1.8rem;
+      }
+      .sub-title {
+        font-size: 1.3rem;
+      }
+      .nav-item {
+        margin: 5px 10px;
+      }
+    }
+
+    /* ── Cart Icon ───────────────────── */
+    .fixed-cart {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      z-index: 1000;
+      background: #28a745;
+      color: white;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      text-decoration: none;
+    }
+    .fixed-cart span { font-weight: bold; }
+
+    /* Product styles */
+    .card-img-top {
+      height: 250px;
+      object-fit: contain;
+      background-color: #f1f3f5;
+      padding: 5px;
+    }
+
+    .card {
+      height: 100%;
+    }
+
+    .card-body {
+      padding: 1rem;
+    }
+
+    .btn-add { 
+      background-color: #28a745; 
+      border: none; 
+      font-size: 1.1rem; 
+    }
+    .btn-add:hover { background-color: #218838; }
+
+    /* Menu Section Headers */
+    .menu-section-header {
+      font-family: 'Bubblegum Sans', sans-serif;
+      font-size: 2.2rem;
+      color: #333;
+      text-align: center;
+      margin: 2.5rem 0 1.5rem;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Fixed Top Navigation Bar -->
+  <header>
+    <div class="brand-container">
+      <h1 class="main-title">Tuckshop Gurus</h1>
+      <div class="sub-title">Glenvista High School</div>
+    </div>
+
+    <nav class="navbar">
+      <ul class="navbar-nav">
+        <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="foods.html">Foods</a></li>
+        <li class="nav-item"><a class="nav-link" href="beverages.html">Beverages & Snacks</a></li>
+        <li class="nav-item"><a class="nav-link" href="ice-cream.html">Ice Creams</a></li>
+        <li class="nav-item"><a class="nav-link" href="cart.html">Cart</a></li>
+        <li class="nav-item"><a class="nav-link" href="staff-login.html">Staff Login</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Fixed Cart Icon -->
+  <a href="cart.html" class="fixed-cart" id="cart-icon">
+    🛒 <span id="cart-count">0</span>
+  </a>
+
+  <div class="container my-4">
+    <h1 class="text-center mb-4">Ice Creams</h1>
+    <p class="text-center text-muted mb-5">Choose your favourite (max 3 of each). Tap "Add to Cart"</p>
+
+    <div class="row g-4">
+      <!-- Strawberry Swirl -->
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="card h-100">
+          <img src="strawberry swirl.jpeg" class="card-img-top" alt="Strawberry Swirl">
+          <div class="card-body text-center">
+            <h5 class="card-title">Strawberry Swirl</h5>
+            <p class="card-text">R12</p>
+            <select class="form-select mb-2" id="qty-strawberryswirl">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+            </select>
+            <button class="btn btn-add w-100" onclick="addToCart('Strawberry Swirl', document.getElementById('qty-strawberryswirl').value, 12)">
+              Add to Cart
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Milky Pie -->
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="card h-100">
+          <img src="milky pie.jpeg" class="card-img-top" alt="Milky Pie">
+          <div class="card-body text-center">
+            <h5 class="card-title">Milky Pie</h5>
+            <p class="card-text">R13</p>
+            <select class="form-select mb-2" id="qty-milkypie">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+            </select>
+            <button class="btn btn-add w-100" onclick="addToCart('Milky Pie', document.getElementById('qty-milkypie').value, 13)">
+              Add to Cart
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Strawberry Sensation -->
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="card h-100">
+          <img src="strawberry sensation.jpeg" class="card-img-top" alt="Strawberry Sensation">
+          <div class="card-body text-center">
+            <h5 class="card-title">Strawberry Sensation</h5>
+            <p class="card-text">R7</p>
+            <select class="form-select mb-2" id="qty-strawberrysens">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+            </select>
+            <button class="btn btn-add w-100" onclick="addToCart('Strawberry Sensation', document.getElementById('qty-strawberrysens').value, 7)">
+              Add to Cart
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Caramello -->
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="card h-100">
+          <img src="caramello ice cream.jpg" class="card-img-top" alt="Caramello">
+          <div class="card-body text-center">
+            <h5 class="card-title">Caramello</h5>
+            <p class="card-text">R15</p>
+            <select class="form-select mb-2" id="qty-caramello">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+            </select>
+            <button class="btn btn-add w-100" onclick="addToCart('Caramello', document.getElementById('qty-caramello').value, 15)">
+              Add to Cart
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Banana Berry -->
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="card h-100">
+          <img src="banana berry ice cream.jpg" class="card-img-top" alt="Banana Berry">
+          <div class="card-body text-center">
+            <h5 class="card-title">Banana Berry</h5>
+            <p class="card-text">R10</p>
+            <select class="form-select mb-2" id="qty-banaberry">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+            </select>
+            <button class="btn btn-add w-100" onclick="addToCart('Banana Berry', document.getElementById('qty-banaberry').value, 10)">
+              Add to Cart
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-center mt-5">
+      <a href="beverages.html" class="btn btn-primary btn-lg me-3">← Back to Beverages & Snacks</a>
+      <a href="cart.html" class="btn btn-warning btn-lg">View Cart →</a>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Same cart logic as other pages
+    let cart = JSON.parse(localStorage.getItem('ghsCart')) || [];
+
+    function updateCartCount() {
+      const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+      document.getElementById('cart-count').textContent = totalItems;
+    }
+
+    function addToCart(name, qty, price) {
+      qty = parseInt(qty);
+      const existing = cart.find(item => item.name === name);
+      if (existing) {
+        existing.qty += qty;
+        if (existing.qty > 3) existing.qty = 3;
+      } else {
+        cart.push({ name, qty, price });
+      }
+      localStorage.setItem('ghsCart', JSON.stringify(cart));
+      updateCartCount();
+      alert(`${qty}x ${name} added to cart!`);
+    }
+
+    updateCartCount();
+  </script>
+</body>
+</html>
