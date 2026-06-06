@@ -213,10 +213,13 @@ app.post('/process-payment', async (req, res) => {
       await newOrder.save();
       console.log(`✅ Order SAVED via redirect: ${orderData.shortCode}`);
       
-      // ✅ SEND EMAIL IN REDIRECT SUCCESS BLOCK
+      // SEND EMAIL WITH DETAILED LOGGING
       console.log(`📧 Attempting to send email to: ${orderData.contact}`);
+      console.log(`📧 EMAIL_USER: ${process.env.EMAIL_USER}`);
+      console.log(`📧 EMAIL_PASS length: ${process.env.EMAIL_PASS ? process.env.EMAIL_PASS.length : 0}`);
+      
       const mailOptions = {
-        from: process.env.EMAIL_USER,
+        from: `"GHS Tuckshop" <${process.env.EMAIL_USER}>`,
         to: orderData.contact,
         subject: `GHS Tuckshop - Order Confirmed (${orderData.shortCode})`,
         html: `
@@ -270,10 +273,13 @@ app.post('/process-payment', async (req, res) => {
       };
 
       try {
-        await transporter.sendMail(mailOptions);
-        console.log(`✅ Email sent to: ${orderData.contact}`);
+        const info = await transporter.sendMail(mailOptions);
+        console.log(`✅ Email sent successfully!`);
+        console.log(`📧 Message ID: ${info.messageId}`);
+        console.log(`📧 Sent to: ${orderData.contact}`);
       } catch (emailErr) {
-        console.error(`❌ Email failed: ${emailErr.message}`);
+        console.error(`❌ Email failed: ${emailErr.code || emailErr.responseCode || 'unknown'} - ${emailErr.message}`);
+        console.error(`📧 Full error details:`, JSON.stringify(emailErr, null, 2));
       }
       
       return res.json({ success: true, shortCode: orderData.shortCode });
@@ -333,7 +339,7 @@ app.post('/process-payment', async (req, res) => {
 
     // Send email confirmation
     const mailOptions = {
-      from: process.env.EMAIL_USER,
+      from: `"GHS Tuckshop" <${process.env.EMAIL_USER}>`,
       to: orderData.contact,
       subject: `GHS Tuckshop - Order Confirmed (${orderData.shortCode})`,
       html: `
@@ -386,8 +392,12 @@ app.post('/process-payment', async (req, res) => {
       `
     };
 
-    await transporter.sendMail(mailOptions).catch(err => console.error('Email send failed:', err));
-    console.log(`📧 Email sent to: ${orderData.contact}`);
+    try {
+      const info = await transporter.sendMail(mailOptions);
+      console.log(`✅ Email sent successfully! Message ID: ${info.messageId}`);
+    } catch (emailErr) {
+      console.error(`❌ Email send failed: ${emailErr.message}`);
+    }
 
     res.json({ success: true, shortCode: orderData.shortCode });
 
