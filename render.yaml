@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: ghs-tuckshop
+    env: node
+    buildCommand: npm install
+    startCommand: node app.js
+    envVars:
+      - key: MONGODB_URI
+        sync: false
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_PASS
+        sync: false
+      - key: YOCO_SECRET_KEY
+        sync: false
+      - key: BASE_URL
+        sync: false
