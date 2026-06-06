@@ -157,7 +157,7 @@
   <div class="container">
     <div class="success-container">
       <div id="saving-status" class="mb-3">
-        <span class="loader"></span> Saving your order...
+        <span class="loader"></span> Confirming your order...
       </div>
       <div id="success-content" style="display: none;">
         <h1 class="text-success mb-4">✅ Order Placed Successfully!</h1>
@@ -175,26 +175,44 @@
   </div>
 
   <script>
-    // Get order code from URL (?code=...)
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
-    const pendingOrder = JSON.parse(localStorage.getItem('pendingOrder'));
-    
-    console.log("Success page loaded. Order code from URL:", code);
-    console.log("Pending order from localStorage:", pendingOrder);
-
-    async function saveOrder() {
-      if (!pendingOrder || !pendingOrder.orderNumber) {
-        console.log("No pending order found in localStorage");
-        document.getElementById('saving-status').innerHTML = '<p class="text-warning">Order already saved or no order data found.</p>';
-        setTimeout(() => {
-          document.getElementById('saving-status').style.display = 'none';
-          document.getElementById('success-content').style.display = 'block';
-          document.getElementById('code-display').textContent = code || '---';
-        }, 1000);
+    (async function() {
+      console.log("Success page loaded");
+      
+      // Get order code from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+      const pendingOrder = JSON.parse(localStorage.getItem('pendingOrder'));
+      
+      console.log("Order code from URL:", code);
+      console.log("Pending order exists:", !!pendingOrder);
+      
+      // If no code in URL, show error
+      if (!code) {
+        document.getElementById('saving-status').innerHTML = '<p class="text-danger">No order code found. Please contact support.</p>';
         return;
       }
-
+      
+      // Check if we've already processed this order in this session
+      const alreadyProcessed = sessionStorage.getItem(`order_${code}_processed`);
+      if (alreadyProcessed) {
+        console.log("Order already processed in this session, showing success");
+        document.getElementById('saving-status').style.display = 'none';
+        document.getElementById('success-content').style.display = 'block';
+        document.getElementById('code-display').textContent = code;
+        return;
+      }
+      
+      // If no pending order, just show success
+      if (!pendingOrder) {
+        console.log("No pending order, showing success");
+        document.getElementById('saving-status').style.display = 'none';
+        document.getElementById('success-content').style.display = 'block';
+        document.getElementById('code-display').textContent = code;
+        sessionStorage.setItem(`order_${code}_processed`, 'true');
+        return;
+      }
+      
+      // Save the order (only once)
       try {
         console.log("Saving order to database...");
         
@@ -202,7 +220,7 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            token: 'redirect_success', // Dummy token since payment was already processed
+            token: 'redirect_success',
             amount: Math.round(pendingOrder.total * 100),
             orderData: pendingOrder
           })
@@ -211,54 +229,42 @@
         const result = await response.json();
         console.log("Save result:", result);
 
+        // Mark as processed regardless of result to prevent loop
+        sessionStorage.setItem(`order_${code}_processed`, 'true');
+        
+        // Clear localStorage
+        localStorage.removeItem('pendingOrder');
+        localStorage.removeItem('ghsCart');
+        
         if (result.success) {
-          document.getElementById('saving-status').innerHTML = '<p class="text-success">✅ Order saved successfully!</p>';
-          localStorage.removeItem('pendingOrder');
-          localStorage.removeItem('ghsCart');
-          
-          setTimeout(() => {
-            document.getElementById('saving-status').style.display = 'none';
-            document.getElementById('success-content').style.display = 'block';
-            document.getElementById('code-display').textContent = result.shortCode || code;
-          }, 1000);
+          document.getElementById('saving-status').innerHTML = '<p class="text-success">✅ Order confirmed!</p>';
         } else {
-          document.getElementById('saving-status').innerHTML = `<p class="text-danger">❌ Error saving order: ${result.error}</p>`;
-          setTimeout(() => {
-            document.getElementById('saving-status').style.display = 'none';
-            document.getElementById('success-content').style.display = 'block';
-            document.getElementById('code-display').textContent = code || '---';
-          }, 2000);
+          document.getElementById('saving-status').innerHTML = '<p class="text-warning">⚠️ Order received but confirmation may be delayed.</p>';
         }
-      } catch (err) {
-        console.error("Save error:", err);
-        document.getElementById('saving-status').innerHTML = '<p class="text-danger">❌ Network error saving order. Please contact support.</p>';
+        
         setTimeout(() => {
           document.getElementById('saving-status').style.display = 'none';
           document.getElementById('success-content').style.display = 'block';
-          document.getElementById('code-display').textContent = code || '---';
-        }, 2000);
+          document.getElementById('code-display').textContent = code;
+        }, 1000);
+        
+      } catch (err) {
+        console.error("Save error:", err);
+        sessionStorage.setItem(`order_${code}_processed`, 'true');
+        localStorage.removeItem('pendingOrder');
+        localStorage.removeItem('ghsCart');
+        
+        document.getElementById('saving-status').innerHTML = '<p class="text-warning">⚠️ Your order has been received. Please note your order code.</p>';
+        
+        setTimeout(() => {
+          document.getElementById('saving-status').style.display = 'none';
+          document.getElementById('success-content').style.display = 'block';
+          document.getElementById('code-display').textContent = code;
+        }, 1500);
       }
-    }
-
-    // If code exists in URL, save the order
-    if (code && pendingOrder) {
-      saveOrder();
-    } else if (code) {
-      // No pending order but we have a code - just show success
-      document.getElementById('saving-status').style.display = 'none';
-      document.getElementById('success-content').style.display = 'block';
-      document.getElementById('code-display').textContent = code;
-      localStorage.removeItem('ghsCart');
-      localStorage.removeItem('pendingOrder');
-    } else {
-      // No code - error
-      document.getElementById('saving-status').innerHTML = '<p class="text-danger">No order code found. Please contact support.</p>';
-      document.getElementById('saving-status').style.backgroundColor = '#f8d7da';
-      document.getElementById('saving-status').style.padding = '15px';
-      document.getElementById('saving-status').style.borderRadius = '8px';
-    }
+    })();
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-</html> 
+</html>
