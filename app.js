@@ -85,14 +85,18 @@ async function getNextShortCode(pickupDate) {
   return { fullOrderNumber, shortCode };
 }
 
-// Nodemailer Setup
+// Nodemailer Setup - Using Brevo SMTP (Updated)
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: process.env.EMAIL_HOST || 'smtp-relay.brevo.com',
+  port: process.env.EMAIL_PORT || 587,
+  secure: false, // false for port 587
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
   },
-  tls: { rejectUnauthorized: false }
+  tls: {
+    rejectUnauthorized: false
+  }
 });
 
 // YOCO Test Secret Key
@@ -213,10 +217,10 @@ app.post('/process-payment', async (req, res) => {
       await newOrder.save();
       console.log(`✅ Order SAVED via redirect: ${orderData.shortCode}`);
       
-      // SEND EMAIL WITH DETAILED LOGGING
+      // SEND EMAIL WITH BREVO
       console.log(`📧 Attempting to send email to: ${orderData.contact}`);
+      console.log(`📧 EMAIL_HOST: ${process.env.EMAIL_HOST}`);
       console.log(`📧 EMAIL_USER: ${process.env.EMAIL_USER}`);
-      console.log(`📧 EMAIL_PASS length: ${process.env.EMAIL_PASS ? process.env.EMAIL_PASS.length : 0}`);
       
       const mailOptions = {
         from: `"GHS Tuckshop" <${process.env.EMAIL_USER}>`,
