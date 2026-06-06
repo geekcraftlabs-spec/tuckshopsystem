@@ -1,4 +1,4 @@
-// app.js - GHS Tuckshop Backend
+// app.js - GHS Tuckshop Backend (Simplified - Email handled by EmailJS)
 
 require('dotenv').config();
 
@@ -6,7 +6,6 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const nodemailer = require('nodemailer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -84,20 +83,6 @@ async function getNextShortCode(pickupDate) {
 
   return { fullOrderNumber, shortCode };
 }
-
-// Nodemailer Setup - Using Brevo SMTP (Updated)
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || 'smtp-relay.brevo.com',
-  port: process.env.EMAIL_PORT || 587,
-  secure: false, // false for port 587
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  },
-  tls: {
-    rejectUnauthorized: false
-  }
-});
 
 // YOCO Test Secret Key
 const YOCO_SECRET_KEY = process.env.YOCO_SECRET_KEY || 'sk_test_9321b248L1zMAZr396f4b95b6cef';
@@ -217,75 +202,6 @@ app.post('/process-payment', async (req, res) => {
       await newOrder.save();
       console.log(`✅ Order SAVED via redirect: ${orderData.shortCode}`);
       
-      // SEND EMAIL WITH BREVO
-      console.log(`📧 Attempting to send email to: ${orderData.contact}`);
-      console.log(`📧 EMAIL_HOST: ${process.env.EMAIL_HOST}`);
-      console.log(`📧 EMAIL_USER: ${process.env.EMAIL_USER}`);
-      
-      const mailOptions = {
-        from: `"GHS Tuckshop" <${process.env.EMAIL_USER}>`,
-        to: orderData.contact,
-        subject: `GHS Tuckshop - Order Confirmed (${orderData.shortCode})`,
-        html: `
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <style>
-              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-              .container { max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; }
-              .header { background: #800000; color: white; padding: 15px; text-align: center; border-radius: 10px 10px 0 0; }
-              .order-code { font-size: 24px; font-weight: bold; color: #800000; text-align: center; margin: 20px 0; }
-              .items { margin: 20px 0; }
-              .total { font-size: 18px; font-weight: bold; text-align: right; border-top: 2px solid #ddd; padding-top: 10px; }
-              .footer { text-align: center; font-size: 12px; color: #666; margin-top: 20px; }
-            </style>
-          </head>
-          <body>
-            <div class="container">
-              <div class="header">
-                <h2>✅ Order Confirmed!</h2>
-              </div>
-              <p>Dear ${orderData.name} ${orderData.surname},</p>
-              <p>Thank you for using the GHS Online Tuckshop!</p>
-              
-              <div class="order-code">
-                Your Order Code: <strong>${orderData.shortCode}</strong>
-              </div>
-              
-              <p><strong>Pickup Date:</strong> ${new Date(orderData.pickupDate).toDateString()}</p>
-              
-              <div class="items">
-                <h3>Items Ordered:</h3>
-                <ul>
-                  ${orderData.items.map(item => `<li>${item.qty}x ${item.name} @ R${item.price}</li>`).join('')}
-                </ul>
-              </div>
-              
-              <div class="total">
-                Total: R${orderData.total.toFixed(2)} (incl. R3 service fee)
-              </div>
-              
-              <p>Collect at the tuckshop. See you soon! 🚀</p>
-              
-              <div class="footer">
-                <p>Glenvista High School Tuckshop</p>
-              </div>
-            </div>
-          </body>
-          </html>
-        `
-      };
-
-      try {
-        const info = await transporter.sendMail(mailOptions);
-        console.log(`✅ Email sent successfully!`);
-        console.log(`📧 Message ID: ${info.messageId}`);
-        console.log(`📧 Sent to: ${orderData.contact}`);
-      } catch (emailErr) {
-        console.error(`❌ Email failed: ${emailErr.code || emailErr.responseCode || 'unknown'} - ${emailErr.message}`);
-        console.error(`📧 Full error details:`, JSON.stringify(emailErr, null, 2));
-      }
-      
       return res.json({ success: true, shortCode: orderData.shortCode });
     }
 
@@ -340,68 +256,6 @@ app.post('/process-payment', async (req, res) => {
 
     await newOrder.save();
     console.log(`✅ Order SAVED after payment: ${orderData.shortCode}`);
-
-    // Send email confirmation
-    const mailOptions = {
-      from: `"GHS Tuckshop" <${process.env.EMAIL_USER}>`,
-      to: orderData.contact,
-      subject: `GHS Tuckshop - Order Confirmed (${orderData.shortCode})`,
-      html: `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; }
-            .header { background: #800000; color: white; padding: 15px; text-align: center; border-radius: 10px 10px 0 0; }
-            .order-code { font-size: 24px; font-weight: bold; color: #800000; text-align: center; margin: 20px 0; }
-            .items { margin: 20px 0; }
-            .total { font-size: 18px; font-weight: bold; text-align: right; border-top: 2px solid #ddd; padding-top: 10px; }
-            .footer { text-align: center; font-size: 12px; color: #666; margin-top: 20px; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <h2>✅ Order Confirmed!</h2>
-            </div>
-            <p>Dear ${orderData.name} ${orderData.surname},</p>
-            <p>Thank you for using the GHS Online Tuckshop!</p>
-            
-            <div class="order-code">
-              Your Order Code: <strong>${orderData.shortCode}</strong>
-            </div>
-            
-            <p><strong>Pickup Date:</strong> ${new Date(orderData.pickupDate).toDateString()}</p>
-            
-            <div class="items">
-              <h3>Items Ordered:</h3>
-              <ul>
-                ${orderData.items.map(item => `<li>${item.qty}x ${item.name} @ R${item.price}</li>`).join('')}
-              </ul>
-            </div>
-            
-            <div class="total">
-              Total: R${orderData.total.toFixed(2)} (incl. R3 service fee)
-            </div>
-            
-            <p>Collect at the tuckshop. See you soon! 🚀</p>
-            
-            <div class="footer">
-              <p>Glenvista High School Tuckshop</p>
-            </div>
-          </div>
-        </body>
-        </html>
-      `
-    };
-
-    try {
-      const info = await transporter.sendMail(mailOptions);
-      console.log(`✅ Email sent successfully! Message ID: ${info.messageId}`);
-    } catch (emailErr) {
-      console.error(`❌ Email send failed: ${emailErr.message}`);
-    }
 
     res.json({ success: true, shortCode: orderData.shortCode });
 
