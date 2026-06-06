@@ -231,20 +231,28 @@
       // 2. SEND CONFIRMATION EMAIL via EmailJS (CLIENT-SIDE)
       if (pendingOrder) {
         console.log("Sending confirmation email via EmailJS...");
+        
+        // Create HTML list for items
+        const orderItemsHtml = pendingOrder.items.map(item => `<li>${item.qty}x ${item.name} @ R${item.price}</li>`).join('');
+        
         const templateParams = {
-            to_email: pendingOrder.contact,
+            customer_email: pendingOrder.contact,  // <-- ADDED THIS (matches your template's {{customer_email}})
             customer_name: `${pendingOrder.name} ${pendingOrder.surname}`,
             order_code: pendingOrder.shortCode,
             pickup_date: new Date(pendingOrder.pickupDate).toDateString(),
-            order_items_html: pendingOrder.items.map(item => `<li>${item.qty}x ${item.name} @ R${item.price}</li>`).join(''),
+            order_items_html: orderItemsHtml,
             total_amount: `R${pendingOrder.total.toFixed(2)}`
         };
 
         try {
             const emailResponse = await emailjs.send("service_acj5qey", "template_39fyana", templateParams);
             console.log("EmailJS Success:", emailResponse);
+            console.log("Email sent to:", pendingOrder.contact);
         } catch (emailError) {
             console.error("EmailJS Error:", emailError);
+            if (emailError.text) {
+                console.error("Error details:", emailError.text);
+            }
         }
       }
       

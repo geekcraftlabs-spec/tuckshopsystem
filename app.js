@@ -1,4 +1,4 @@
-// app.js - GHS Tuckshop Backend (Simplified - Email handled by EmailJS)
+// app.js - GHS Tuckshop Backend (Simplified - No Email - Handled by EmailJS on Frontend)
 
 require('dotenv').config();
 
