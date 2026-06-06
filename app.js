@@ -212,6 +212,70 @@ app.post('/process-payment', async (req, res) => {
 
       await newOrder.save();
       console.log(`✅ Order SAVED via redirect: ${orderData.shortCode}`);
+      
+      // ✅ SEND EMAIL IN REDIRECT SUCCESS BLOCK
+      console.log(`📧 Attempting to send email to: ${orderData.contact}`);
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: orderData.contact,
+        subject: `GHS Tuckshop - Order Confirmed (${orderData.shortCode})`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <style>
+              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+              .container { max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; }
+              .header { background: #800000; color: white; padding: 15px; text-align: center; border-radius: 10px 10px 0 0; }
+              .order-code { font-size: 24px; font-weight: bold; color: #800000; text-align: center; margin: 20px 0; }
+              .items { margin: 20px 0; }
+              .total { font-size: 18px; font-weight: bold; text-align: right; border-top: 2px solid #ddd; padding-top: 10px; }
+              .footer { text-align: center; font-size: 12px; color: #666; margin-top: 20px; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h2>✅ Order Confirmed!</h2>
+              </div>
+              <p>Dear ${orderData.name} ${orderData.surname},</p>
+              <p>Thank you for using the GHS Online Tuckshop!</p>
+              
+              <div class="order-code">
+                Your Order Code: <strong>${orderData.shortCode}</strong>
+              </div>
+              
+              <p><strong>Pickup Date:</strong> ${new Date(orderData.pickupDate).toDateString()}</p>
+              
+              <div class="items">
+                <h3>Items Ordered:</h3>
+                <ul>
+                  ${orderData.items.map(item => `<li>${item.qty}x ${item.name} @ R${item.price}</li>`).join('')}
+                </ul>
+              </div>
+              
+              <div class="total">
+                Total: R${orderData.total.toFixed(2)} (incl. R3 service fee)
+              </div>
+              
+              <p>Collect at the tuckshop. See you soon! 🚀</p>
+              
+              <div class="footer">
+                <p>Glenvista High School Tuckshop</p>
+              </div>
+            </div>
+          </body>
+          </html>
+        `
+      };
+
+      try {
+        await transporter.sendMail(mailOptions);
+        console.log(`✅ Email sent to: ${orderData.contact}`);
+      } catch (emailErr) {
+        console.error(`❌ Email failed: ${emailErr.message}`);
+      }
+      
       return res.json({ success: true, shortCode: orderData.shortCode });
     }
 
@@ -271,17 +335,54 @@ app.post('/process-payment', async (req, res) => {
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: orderData.contact,
-      subject: 'GHS Tuckshop - Order Confirmation',
+      subject: `GHS Tuckshop - Order Confirmed (${orderData.shortCode})`,
       html: `
-        <h2>Thank you for your order!</h2>
-        <p>Your order code: <strong>${orderData.shortCode}</strong></p>
-        <p>Pickup Date: ${new Date(orderData.pickupDate).toDateString()}</p>
-        <h3>Items Ordered:</h3>
-        <ul>
-          ${orderData.items.map(item => `<li>${item.qty}x ${item.name} - R${(item.price * item.qty).toFixed(2)}</li>`).join('')}
-        </ul>
-        <p><strong>Total: R${orderData.total.toFixed(2)}</strong></p>
-        <p>Please show this code when collecting your order.</p>
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; }
+            .header { background: #800000; color: white; padding: 15px; text-align: center; border-radius: 10px 10px 0 0; }
+            .order-code { font-size: 24px; font-weight: bold; color: #800000; text-align: center; margin: 20px 0; }
+            .items { margin: 20px 0; }
+            .total { font-size: 18px; font-weight: bold; text-align: right; border-top: 2px solid #ddd; padding-top: 10px; }
+            .footer { text-align: center; font-size: 12px; color: #666; margin-top: 20px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h2>✅ Order Confirmed!</h2>
+            </div>
+            <p>Dear ${orderData.name} ${orderData.surname},</p>
+            <p>Thank you for using the GHS Online Tuckshop!</p>
+            
+            <div class="order-code">
+              Your Order Code: <strong>${orderData.shortCode}</strong>
+            </div>
+            
+            <p><strong>Pickup Date:</strong> ${new Date(orderData.pickupDate).toDateString()}</p>
+            
+            <div class="items">
+              <h3>Items Ordered:</h3>
+              <ul>
+                ${orderData.items.map(item => `<li>${item.qty}x ${item.name} @ R${item.price}</li>`).join('')}
+              </ul>
+            </div>
+            
+            <div class="total">
+              Total: R${orderData.total.toFixed(2)} (incl. R3 service fee)
+            </div>
+            
+            <p>Collect at the tuckshop. See you soon! 🚀</p>
+            
+            <div class="footer">
+              <p>Glenvista High School Tuckshop</p>
+            </div>
+          </div>
+        </body>
+        </html>
       `
     };
 
