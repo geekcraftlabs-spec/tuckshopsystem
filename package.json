@@ -7,7 +7,12 @@
     "start": "node app.js",
     "dev": "nodemon app.js"
   },
-  "keywords": ["tuckshop", "school", "ordering", "yoco"],
+  "keywords": [
+    "tuckshop",
+    "school",
+    "ordering",
+    "yoco"
+  ],
   "author": "Geek Craft Labs",
   "license": "ISC",
   "type": "commonjs",
@@ -16,6 +21,7 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
     "mongodb": "^7.1.0",
     "mongoose": "^9.1.2",
     "node-cron": "^4.2.1",
