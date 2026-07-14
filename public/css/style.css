@@ -1,0 +1,459 @@
+/* ============================================================
+   Sandton School Group – Global Design System
+   ============================================================ */
+
+/* ─── Font Imports ─────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600;700&display=swap');
+
+/* ─── CSS Variables ────────────────────────────────────────── */
+:root {
+  /* Colours */
+  --primary-navy: #003057;
+  --secondary-royal: #2b6cb0;
+  --accent-gold: #ed8936;
+  --action-red: #C41230;
+  --bg-light: #F8F9FA;
+  --white: #FFFFFF;
+  --gray-100: #F1F5F9;
+  --gray-600: #4B5563;
+  --gray-900: #1A2A3A;
+
+  /* Fonts */
+  --font-heading: 'Playfair Display', serif;
+  --font-body: 'Inter', sans-serif;
+
+  /* Spacing (Tailwind-like scale) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+
+  /* Shadows */
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  /* Border radius */
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.5rem;
+}
+
+/* ─── Reset & Base ─────────────────────────────────────────── */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg-light);
+  color: var(--gray-900);
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: var(--gray-900);
+}
+
+a {
+  text-decoration: none;
+  color: var(--secondary-royal);
+}
+a:hover {
+  color: var(--primary-navy);
+}
+
+/* ─── Layout Containers ────────────────────────────────────── */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+}
+
+.section {
+  padding: var(--space-16) 0;
+}
+@media (max-width: 768px) {
+  .section {
+    padding: var(--space-12) 0;
+  }
+}
+
+/* ─── Header / Navigation ──────────────────────────────────── */
+header {
+  background-color: var(--primary-navy);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: var(--shadow-md);
+}
+
+.brand-container {
+  text-align: center;
+  padding: var(--space-2) 0 var(--space-1);
+}
+
+.main-title {
+  font-family: var(--font-heading);
+  font-size: 2.6rem;
+  color: var(--white);
+  margin: 0;
+  letter-spacing: 1px;
+}
+.sub-title {
+  font-family: var(--font-body);
+  font-size: 1.2rem;
+  color: var(--gray-100);
+  font-weight: 400;
+  margin: 0;
+}
+
+.navbar {
+  background-color: rgba(0, 48, 87, 0.9);
+  backdrop-filter: blur(4px);
+  padding: var(--space-2) 0;
+}
+
+.navbar-nav {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  list-style: none;
+  gap: var(--space-4) var(--space-6);
+}
+
+.nav-item {
+  margin: 0;
+}
+
+.nav-link {
+  color: var(--white);
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: color 0.3s;
+}
+.nav-link:hover,
+.nav-link.active {
+  color: var(--accent-gold);
+}
+
+/* Mobile adjustments */
+@media (max-width: 576px) {
+  .main-title { font-size: 1.8rem; }
+  .sub-title { font-size: 1rem; }
+  .navbar-nav { gap: var(--space-2); }
+  .nav-link { font-size: 0.85rem; }
+}
+
+/* ─── Cards ────────────────────────────────────────────────── */
+.card {
+  background: var(--white);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
+}
+
+.card-header {
+  background: var(--primary-navy);
+  color: var(--white);
+  padding: var(--space-4) var(--space-6);
+  border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+}
+.card-header h3 {
+  color: var(--white);
+  margin: 0;
+}
+
+.card-body {
+  padding: var(--space-6);
+}
+
+/* ─── Buttons ────────────────────────────────────────────────── */
+.btn {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 50px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: center;
+}
+
+.btn-primary {
+  background: var(--primary-navy);
+  color: var(--white);
+}
+.btn-primary:hover {
+  background: var(--secondary-royal);
+  color: var(--white);
+}
+
+.btn-success {
+  background: var(--action-red);
+  color: var(--white);
+}
+.btn-success:hover {
+  background: #a00f2a;
+  color: var(--white);
+}
+
+.btn-warning {
+  background: var(--accent-gold);
+  color: var(--white);
+}
+.btn-warning:hover {
+  background: #d97706;
+  color: var(--white);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 2px solid var(--secondary-royal);
+  color: var(--secondary-royal);
+}
+.btn-outline:hover {
+  background: var(--secondary-royal);
+  color: var(--white);
+}
+
+.btn-lg {
+  padding: 1rem 2.5rem;
+  font-size: 1.1rem;
+}
+.btn-block {
+  display: block;
+  width: 100%;
+}
+
+/* ─── Forms ────────────────────────────────────────────────── */
+.form-control {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--gray-100);
+  border-radius: var(--radius-2xl);
+  font-family: var(--font-body);
+  background: var(--white);
+  transition: border-color 0.3s;
+}
+.form-control:focus {
+  outline: none;
+  border-color: var(--secondary-royal);
+  box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.2);
+}
+.form-label {
+  font-weight: 500;
+  color: var(--gray-900);
+}
+
+/* ─── Product Grid ─────────────────────────────────────────── */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-6);
+}
+@media (max-width: 640px) {
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+  }
+}
+
+.product-card .card-img-top {
+  height: 200px;
+  object-fit: contain;
+  background: var(--gray-100);
+  padding: var(--space-2);
+}
+.product-card .card-body {
+  text-align: center;
+}
+.product-card .card-title {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: var(--space-2);
+}
+.product-card .price {
+  color: var(--action-red);
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+.product-card .btn-add {
+  background: var(--primary-navy);
+  color: var(--white);
+  border: none;
+  width: 100%;
+  padding: 0.6rem;
+  border-radius: 50px;
+  font-weight: 600;
+  transition: background 0.3s;
+}
+.product-card .btn-add:hover {
+  background: var(--secondary-royal);
+}
+.product-card .btn-add:disabled {
+  background: var(--gray-600);
+  cursor: not-allowed;
+}
+
+/* ─── Section Headers ──────────────────────────────────────── */
+.section-title {
+  font-size: 2.5rem;
+  text-align: center;
+  margin-bottom: var(--space-8);
+  color: var(--gray-900);
+}
+.section-title span {
+  color: var(--action-red);
+}
+
+/* ─── Cart / Summary ───────────────────────────────────────── */
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--gray-100);
+}
+.cart-item .item-name {
+  font-weight: 500;
+}
+.cart-item .item-price {
+  font-weight: 600;
+}
+.cart-total {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--primary-navy);
+}
+
+/* ─── Hero Section ─────────────────────────────────────────── */
+.hero {
+  background: linear-gradient(rgba(0, 48, 87, 0.7), rgba(0, 48, 87, 0.7)),
+              url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80') center/cover no-repeat;
+  color: var(--white);
+  padding: var(--space-20) 0;
+  text-align: center;
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+}
+.hero h1 {
+  color: var(--white);
+  font-size: 3.5rem;
+  margin-bottom: var(--space-4);
+}
+.hero p {
+  font-size: 1.3rem;
+  max-width: 700px;
+  margin: 0 auto var(--space-6);
+  color: var(--gray-100);
+}
+
+/* ─── Footer ────────────────────────────────────────────────── */
+.footer {
+  background: var(--primary-navy);
+  color: var(--gray-100);
+  padding: var(--space-12) 0 var(--space-6);
+  margin-top: var(--space-16);
+}
+.footer a {
+  color: var(--gray-100);
+}
+.footer a:hover {
+  color: var(--accent-gold);
+}
+.footer .footer-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-8);
+}
+@media (max-width: 768px) {
+  .footer .footer-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 576px) {
+  .footer .footer-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.footer .brand {
+  font-family: var(--font-heading);
+  font-size: 1.8rem;
+  color: var(--white);
+}
+.footer .credit {
+  text-align: center;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding-top: var(--space-6);
+  margin-top: var(--space-8);
+  font-size: 0.9rem;
+}
+.footer .credit a {
+  color: var(--accent-gold);
+}
+
+/* ─── Utilities ────────────────────────────────────────────── */
+.text-center { text-align: center; }
+.text-muted { color: var(--gray-600); }
+.mt-4 { margin-top: var(--space-4); }
+.mb-4 { margin-bottom: var(--space-4); }
+.mt-5 { margin-top: var(--space-6); }
+.mb-5 { margin-bottom: var(--space-6); }
+.py-5 { padding-top: var(--space-6); padding-bottom: var(--space-6); }
+.gap-3 { gap: var(--space-4); }
+.flex-wrap { flex-wrap: wrap; }
+.d-flex { display: flex; }
+.justify-content-center { justify-content: center; }
+.align-items-center { align-items: center; }
+.w-100 { width: 100%; }
+
+/* ─── Fixed Cart Icon ──────────────────────────────────────── */
+.fixed-cart {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 999;
+  background: var(--action-red);
+  color: var(--white);
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  box-shadow: var(--shadow-xl);
+  transition: transform 0.2s;
+}
+.fixed-cart:hover {
+  transform: scale(1.1);
+  color: var(--white);
+}
+.fixed-cart .badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: var(--accent-gold);
+  color: var(--white);
+  border-radius: 50%;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
