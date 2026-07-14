@@ -7,12 +7,7 @@
     "start": "node app.js",
     "dev": "nodemon app.js"
   },
-  "keywords": [
-    "tuckshop",
-    "school",
-    "ordering",
-    "yoco"
-  ],
+  "keywords": ["tuckshop", "school", "ordering", "yoco"],
   "author": "Geek Craft Labs",
   "license": "ISC",
   "type": "commonjs",

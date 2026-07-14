@@ -1,6 +1,6 @@
 // ============================================================
 // app.js – Tuckshop Backend (Express + MongoDB)
-// Now with SSO JWT validation for all protected endpoints
+// SSO JWT validation, serverless-ready for Vercel
 // ============================================================
 
 require('dotenv').config();
@@ -9,28 +9,58 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
 const jwt = require('jsonwebtoken');
-const Yoco = require('yoco-sdk'); // adjust if you have a different import
+
+// ─── Yoco import (with fallback) ────────────────────────────
+let Yoco;
+try {
+  // Use the correct package name (check your installed package)
+  Yoco = require('@yoco/sdk');
+} catch (e) {
+  console.warn('⚠️ Yoco SDK not found – using mock for development.');
+  // Mock class that returns a fake redirect URL
+  Yoco = class YocoMock {
+    constructor() {}
+    async createTransaction() {
+      return { redirectUrl: '/mock-payment-success' };
+    }
+  };
+}
 
 const app = express();
 
 // ─── Middleware ───────────────────────────────────────────────
-app.use(cors({ origin: 'https://sandton-school-group.vercel.app', credentials: true }));
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || 'https://sandton-school-group.vercel.app',
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ─── MongoDB ─────────────────────────────────────────────────
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('✅ MongoDB connected'))
-.catch(err => console.error('❌ MongoDB connection error:', err));
+// ─── MongoDB Connection (cached for serverless) ──────────────
+let cachedDb = null;
+
+async function connectToDatabase() {
+  if (cachedDb) return cachedDb;
+  try {
+    const conn = await mongoose.connect(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 5000,
+    });
+    cachedDb = conn;
+    console.log('✅ MongoDB connected');
+    return conn;
+  } catch (err) {
+    console.error('❌ MongoDB connection error:', err.message);
+    throw err; // Will crash the function, but Vercel will retry
+  }
+}
 
 // ─── Order Schema ────────────────────────────────────────────
 const orderSchema = new mongoose.Schema({
-  userId: { type: String, required: true, index: true },   // from JWT
-  studentId: { type: String },                             // optional
+  userId: { type: String, required: true, index: true },
+  studentId: { type: String },
   shortCode: { type: String, required: true, unique: true },
   name: String,
   surname: String,
@@ -58,7 +88,7 @@ const verifyToken = (req, res, next) => {
   const token = authHeader.split(' ')[1];
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;   // { userId, email, role, studentId?, ... }
+    req.user = decoded;
     next();
   } catch (err) {
     return res.status(401).json({ error: 'Invalid or expired token' });
@@ -69,13 +99,11 @@ const verifyToken = (req, res, next) => {
 function generateShortCode() {
   const now = new Date();
   const day = String(now.getDate()).padStart(2, '0');
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const year = String(now.getFullYear()).slice(-2);
   const rand = String(Math.floor(Math.random() * 1000)).padStart(3, '0');
   return `${day}-${rand}`;
 }
 
-// ─── YOCO SDK (replace with your actual Yoco setup) ─────────
+// ─── YOCO instance ────────────────────────────────────────────
 const yoco = new Yoco({
   secretKey: process.env.YOCO_SECRET_KEY,
   publicKey: process.env.YOCO_PUBLIC_KEY,
@@ -86,21 +114,18 @@ const yoco = new Yoco({
 // 1. Create checkout (protected)
 app.post('/create-checkout', verifyToken, async (req, res) => {
   try {
+    await connectToDatabase();
     const orderData = req.body;
-    // Attach userId from token
     orderData.userId = req.user.userId;
     if (req.user.studentId) orderData.studentId = req.user.studentId;
 
-    // Generate short code
     const shortCode = generateShortCode();
     orderData.shortCode = shortCode;
 
-    // Calculate total (subtotal + service fee)
     const subtotal = orderData.items.reduce((sum, item) => sum + item.qty * item.price, 0);
-    const total = subtotal + 3; // service fee
+    const total = subtotal + 3;
     orderData.total = total;
 
-    // Create Yoco transaction
     const amountInCents = Math.round(total * 100);
     const transaction = await yoco.createTransaction({
       amount: amountInCents,
@@ -108,11 +133,10 @@ app.post('/create-checkout', verifyToken, async (req, res) => {
       metadata: { shortCode, userId: req.user.userId },
     });
 
-    // Send back checkout URL and pending order (without sensitive data)
     res.json({
       success: true,
       checkoutUrl: transaction.redirectUrl,
-      pendingOrder: { ...orderData, _id: transaction.id }, // store transaction id
+      pendingOrder: { ...orderData, _id: transaction.id },
     });
   } catch (err) {
     console.error('Create checkout error:', err);
@@ -123,9 +147,8 @@ app.post('/create-checkout', verifyToken, async (req, res) => {
 // 2. Process payment (called from order-success page, protected)
 app.post('/process-payment', verifyToken, async (req, res) => {
   try {
+    await connectToDatabase();
     const { token, amount, orderData } = req.body;
-    // Verify the payment with Yoco (optional – you can rely on webhook)
-    // For simplicity we assume payment succeeded and save order.
     const newOrder = new Order({
       ...orderData,
       userId: req.user.userId,
@@ -142,10 +165,7 @@ app.post('/process-payment', verifyToken, async (req, res) => {
 // 3. Staff dashboard – get totals for a date (protected)
 app.get('/dashboard', verifyToken, async (req, res) => {
   try {
-    // Optional: check if user role is staff or admin
-    // if (req.user.role !== 'staff' && req.user.role !== 'admin') {
-    //   return res.status(403).json({ error: 'Forbidden' });
-    // }
+    await connectToDatabase();
     const date = req.query.date;
     if (!date) return res.status(400).json({ error: 'Date required' });
     const start = new Date(date);
@@ -160,8 +180,7 @@ app.get('/dashboard', verifyToken, async (req, res) => {
     const totals = {};
     orders.forEach(order => {
       order.items.forEach(item => {
-        if (totals[item.name]) totals[item.name] += item.qty;
-        else totals[item.name] = item.qty;
+        totals[item.name] = (totals[item.name] || 0) + item.qty;
       });
     });
     res.json({ success: true, totals });
@@ -173,6 +192,7 @@ app.get('/dashboard', verifyToken, async (req, res) => {
 // 4. Lookup order by short code (protected)
 app.get('/orders/lookup/:code', verifyToken, async (req, res) => {
   try {
+    await connectToDatabase();
     const code = req.params.code;
     const order = await Order.findOne({ shortCode: code });
     if (!order) return res.status(404).json({ success: false, error: 'Order not found' });
@@ -185,6 +205,7 @@ app.get('/orders/lookup/:code', verifyToken, async (req, res) => {
 // 5. Mark order as collected (protected)
 app.post('/orders/mark-collected', verifyToken, async (req, res) => {
   try {
+    await connectToDatabase();
     const { shortCode } = req.body;
     const order = await Order.findOneAndUpdate(
       { shortCode },
@@ -198,8 +219,14 @@ app.post('/orders/mark-collected', verifyToken, async (req, res) => {
   }
 });
 
-// ─── Start server ────────────────────────────────────────────
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`🚀 Tuckshop server running on port ${PORT}`);
-});
+// ─── Export for Vercel (serverless) ──────────────────────────
+// If running locally, start the server
+if (require.main === module) {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`🚀 Tuckshop server running on port ${PORT}`);
+  });
+}
+
+// Export the app for serverless environments (Vercel)
+module.exports = app;

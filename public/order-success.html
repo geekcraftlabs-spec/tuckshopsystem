@@ -7,120 +7,286 @@
   <link rel="stylesheet" href="css/style.css" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 </head>
 <body>
 
-  <header>
-    <div class="brand-container">
-      <h1 class="main-title">Sandton School Tuckshop</h1>
-      <div class="sub-title">Sandton School Group</div>
-    </div>
-    <nav class="navbar">
-      <ul class="navbar-nav">
-        <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
-        <li class="nav-item"><a class="nav-link" href="foods.html">Foods</a></li>
-        <li class="nav-item"><a class="nav-link" href="beverages.html">Beverages & Snacks</a></li>
-        <li class="nav-item"><a class="nav-link" href="ice-cream.html">Ice Creams</a></li>
-        <li class="nav-item"><a class="nav-link" href="cart.html">Cart</a></li>
-        <li class="nav-item"><a class="nav-link" href="staff-login.html">Staff</a></li>
-      </ul>
-    </nav>
-  </header>
+<!-- ============================================
+     HEADER – Same as before (no active link)
+     ============================================ -->
+<style>
+  :root {
+    --primary-navy: #003057;
+    --action-red: #C41230;
+    --gray-100: #f1f5f9;
+    --gray-600: #4b5563;
+    --gray-700: #334155;
+    --gray-900: #1a2a3a;
+    --radius-full: 9999px;
+    --transition: 0.2s ease-in-out;
+  }
+  body { padding-top: 80px; }
+  .header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 999;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    height: 80px;
+    display: flex;
+    align-items: center;
+    transition: background 0.3s, box-shadow 0.3s;
+  }
+  .header.scrolled { background: rgba(255,255,255,0.97); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+  .header__inner { max-width: 1200px; width: 100%; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; }
+  .logo { display: flex; align-items: center; gap: 12px; flex-shrink: 0; text-decoration: none; }
+  .logo__img { width: 44px; height: 44px; object-fit: contain; }
+  .logo__text { display: flex; flex-direction: column; line-height: 1.2; }
+  .logo__brand { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; color: var(--primary-navy); letter-spacing: -0.01em; }
+  .logo__tagline { font-size: 0.6rem; font-weight: 500; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.15em; }
+  .nav { display: flex; align-items: center; gap: 24px; }
+  .nav__link { font-size: 0.875rem; font-weight: 500; color: var(--gray-600); padding: 6px 0; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; text-decoration: none; }
+  .nav__link:hover, .nav__link.active { color: var(--primary-navy); border-bottom-color: var(--action-red); }
+  .cart-btn { position: relative; width: 40px; height: 40px; background: transparent; border: none; cursor: pointer; font-size: 1.3rem; color: var(--gray-700); border-radius: var(--radius-full); transition: background 0.2s; display: flex; align-items: center; justify-content: center; }
+  .cart-btn:hover { background: var(--gray-100); }
+  .cart-badge { position: absolute; top: -4px; right: -4px; min-width: 20px; height: 20px; padding: 0 6px; font-size: 0.65rem; font-weight: 700; background: var(--action-red); color: #fff; border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; line-height: 1; }
+  .auth-status { font-size: 0.8rem; font-weight: 500; padding: 6px 16px; border-radius: var(--radius-full); border: 1px solid #e2e8f0; background: #fff; transition: all 0.2s; }
+  .auth-status.logged-in { border-color: #22c55e; color: #15803d; }
+  .auth-status.logged-out { border-color: #cbd5e1; color: var(--gray-600); }
+  .auth-status .logout-link { margin-left: 8px; color: var(--action-red); font-weight: 600; cursor: pointer; }
+  .auth-status .logout-link:hover { text-decoration: underline; }
+  .btn-cta { font-size: 0.8rem; font-weight: 600; padding: 10px 24px; border-radius: var(--radius-full); border: none; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block; }
+  .btn-cta--primary { background: var(--action-red); color: #fff; box-shadow: 0 4px 14px rgba(196,18,48,0.25); }
+  .btn-cta--primary:hover { background: #a00f27; transform: scale(1.02); }
+  .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 6px; }
+  .hamburger span { display: block; width: 24px; height: 2px; background: var(--gray-900); border-radius: 2px; transition: all 0.2s; }
+  .hamburger.open span:nth-child(1) { transform: rotate(45deg) translateY(7px); }
+  .hamburger.open span:nth-child(2) { opacity: 0; }
+  .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translateY(-7px); }
+  .mobile-menu { display: none; position: fixed; top: 80px; left: 0; right: 0; bottom: 0; background: #fff; padding: 24px; overflow-y: auto; flex-direction: column; gap: 8px; border-top: 1px solid #e2e8f0; z-index: 998; }
+  .mobile-menu.open { display: flex; }
+  .mobile-menu__link { padding: 14px 16px; font-size: 1rem; font-weight: 500; color: var(--gray-700); border-radius: 1.5rem; transition: background 0.2s; display: flex; align-items: center; justify-content: space-between; text-decoration: none; }
+  .mobile-menu__link:hover, .mobile-menu__link.active { background: var(--gray-100); color: var(--primary-navy); }
+  .mobile-menu__link .badge { font-size: 0.7rem; background: var(--action-red); color: #fff; padding: 2px 10px; border-radius: var(--radius-full); }
+  .mobile-menu__divider { height: 1px; background: #e2e8f0; margin: 8px 0; }
+  @media (max-width: 992px) { .nav { display: none; } .hamburger { display: flex; } .header__inner { padding: 0 16px; } .logo__brand { font-size: 1.1rem; } .logo__tagline { font-size: 0.5rem; } }
+  @media (max-width: 480px) { .logo__img { width: 36px; height: 36px; } .logo__brand { font-size: 0.95rem; } .btn-cta { font-size: 0.75rem; padding: 8px 16px; } .auth-status { font-size: 0.7rem; padding: 4px 12px; } }
+</style>
 
-  <div class="container my-5" style="padding-top: 100px;">
-    <div class="card" style="max-width: 600px; margin: 0 auto;">
-      <div class="card-body text-center">
-        <div id="saving-status" class="mb-3">
-          <span class="spinner-border spinner-border-sm text-success" role="status"></span> Confirming your order...
+<header class="header" id="header">
+  <div class="header__inner">
+    <a href="index.html" class="logo">
+      <img src="mainlogo.png" alt="Sandton School Group" class="logo__img" />
+      <div class="logo__text">
+        <span class="logo__brand">Sandton Tuckshop</span>
+        <span class="logo__tagline">Est. 2002 • Excellence in Education</span>
+      </div>
+    </a>
+    <nav class="nav">
+      <a href="index.html" class="nav__link" id="navHome">Home</a>
+      <a href="foods.html" class="nav__link" id="navFoods">Foods</a>
+      <a href="beverages.html" class="nav__link" id="navBeverages">Beverages</a>
+      <a href="ice-cream.html" class="nav__link" id="navIceCream">Ice Creams</a>
+      <button class="cart-btn" id="cartBtn"><span class="cart-badge" id="cartBadge">0</span></button>
+      <div class="auth-status logged-out" id="authStatus"><span id="authText">Not logged in</span><a href="#" class="logout-link" id="authAction">Log In</a></div>
+      <a href="https://sandtonschoolgroup.vercel.app/subscribe" class="btn-cta btn-cta--primary">Subscribe</a>
+    </nav>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html" class="mobile-menu__link" id="mobHome">Home</a>
+  <a href="foods.html" class="mobile-menu__link" id="mobFoods">Foods</a>
+  <a href="beverages.html" class="mobile-menu__link" id="mobBeverages">Beverages</a>
+  <a href="ice-cream.html" class="mobile-menu__link" id="mobIceCream">Ice Creams</a>
+  <div class="mobile-menu__divider"></div>
+  <a href="cart.html" class="mobile-menu__link">🛒 Cart <span class="badge" id="mobileCartBadge">0</span></a>
+  <div class="mobile-menu__divider"></div>
+  <div id="mobileAuth"><a href="https://sandtonschoolgroup.vercel.app/login" class="mobile-menu__link" id="mobileAuthLink">🔐 Log In</a></div>
+  <a href="https://sandtonschoolgroup.vercel.app/subscribe" class="mobile-menu__link" style="color: var(--action-red); font-weight: 600;">Subscribe Now →</a>
+</div>
+
+<script>
+  (function() {
+    const header = document.getElementById('header');
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const cartBadge = document.getElementById('cartBadge');
+    const mobileCartBadge = document.getElementById('mobileCartBadge');
+    const authStatus = document.getElementById('authStatus');
+    const authText = document.getElementById('authText');
+    const authAction = document.getElementById('authAction');
+    const mobileAuthLink = document.getElementById('mobileAuthLink');
+
+    function updateCartCount() {
+      let count = 0;
+      try { const cart = JSON.parse(localStorage.getItem('ghsCart') || '[]'); count = cart.reduce((s,i) => s + (i.qty||0), 0); } catch(_) {}
+      cartBadge.textContent = count;
+      mobileCartBadge.textContent = count;
+      cartBadge.style.display = count > 0 ? 'flex' : 'none';
+      mobileCartBadge.style.display = count > 0 ? 'inline' : 'none';
+    }
+
+    function updateAuth() {
+      let isLoggedIn = false, userName = '';
+      try {
+        const token = localStorage.getItem('authToken');
+        if (token) {
+          const payload = token.split('.')[1];
+          const decoded = JSON.parse(atob(payload));
+          isLoggedIn = true;
+          userName = decoded.studentName || decoded.email || 'Student';
+        }
+      } catch(_) {}
+      if (isLoggedIn) {
+        authStatus.className = 'auth-status logged-in';
+        authText.textContent = '👋 ' + userName;
+        authAction.textContent = 'Logout';
+        authAction.href = '#';
+        authAction.onclick = function(e) { e.preventDefault(); localStorage.removeItem('authToken'); window.location.reload(); };
+        mobileAuthLink.innerHTML = '👋 ' + userName + ' (Logout)';
+        mobileAuthLink.href = '#';
+        mobileAuthLink.onclick = function(e) { e.preventDefault(); localStorage.removeItem('authToken'); window.location.reload(); };
+      } else {
+        authStatus.className = 'auth-status logged-out';
+        authText.textContent = 'Not logged in';
+        authAction.textContent = 'Log In';
+        authAction.href = 'https://sandtonschoolgroup.vercel.app/login';
+        authAction.onclick = null;
+        mobileAuthLink.innerHTML = '🔐 Log In';
+        mobileAuthLink.href = 'https://sandtonschoolgroup.vercel.app/login';
+        mobileAuthLink.onclick = null;
+      }
+    }
+
+    hamburger.addEventListener('click', function() {
+      const isOpen = hamburger.classList.toggle('open');
+      mobileMenu.classList.toggle('open');
+      document.body.style.overflow = isOpen ? 'hidden' : '';
+    });
+    mobileMenu.querySelectorAll('a').forEach(function(link) {
+      link.addEventListener('click', function() {
+        hamburger.classList.remove('open');
+        mobileMenu.classList.remove('open');
+        document.body.style.overflow = '';
+      });
+    });
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 20) header.classList.add('scrolled');
+      else header.classList.remove('scrolled');
+    });
+
+    updateCartCount();
+    updateAuth();
+    window.addEventListener('storage', function(e) {
+      if (e.key === 'ghsCart') updateCartCount();
+      if (e.key === 'authToken') updateAuth();
+    });
+    window.addEventListener('focus', updateAuth);
+  })();
+</script>
+
+<!-- ============================================
+     ORDER SUCCESS CONTENT
+     ============================================ -->
+<div class="container my-5" style="padding-top: 20px;">
+  <div class="card" style="max-width: 600px; margin: 0 auto;">
+    <div class="card-body text-center">
+      <div id="saving-status" class="mb-3">
+        <span class="spinner-border spinner-border-sm text-success" role="status"></span> Confirming your order...
+      </div>
+      <div id="success-content" style="display: none;">
+        <h1 class="text-success mb-4">✅ Order Placed Successfully!</h1>
+        <p class="lead">Thank you for your order!</p>
+        <p>Your payment has been processed and order received.</p>
+        <div class="mt-4 mb-4">
+          <p><strong>Your Order Code:</strong></p>
+          <div class="display-4 fw-bold text-primary" id="code-display">---</div>
+          <p class="text-muted mt-2">Please show this code when collecting your order</p>
         </div>
-        <div id="success-content" style="display: none;">
-          <h1 class="text-success mb-4">✅ Order Placed Successfully!</h1>
-          <p class="lead">Thank you for your order!</p>
-          <p>Your payment has been processed and order received.</p>
-          <div class="mt-4 mb-4">
-            <p><strong>Your Order Code:</strong></p>
-            <div class="display-4 fw-bold text-primary" id="code-display">---</div>
-            <p class="text-muted mt-2">Please show this code when collecting your order</p>
-          </div>
-          <p class="text-muted mt-3">📧 A confirmation email has been sent with full details.</p>
-          <a href="index.html" class="btn btn-primary btn-lg mt-4">Back to Home</a>
-        </div>
+        <p class="text-muted mt-3">📧 A confirmation email has been sent with full details.</p>
+        <a href="index.html" class="btn btn-primary btn-lg mt-4">Back to Home</a>
       </div>
     </div>
   </div>
+</div>
 
-  <footer class="footer">
-    <div class="container">
-      <div class="footer-grid">
-        <div><div class="brand">Sandton School Group</div><p class="mt-2">Excellence in Education</p></div>
-        <div><h5>Quick Links</h5><ul class="list-unstyled"><li><a href="index.html">Home</a></li><li><a href="foods.html">Foods</a></li><li><a href="beverages.html">Beverages</a></li><li><a href="ice-cream.html">Ice Creams</a></li></ul></div>
-        <div><h5>Contact</h5><p>📞 +27 11 123 4567</p><p>✉️ info@sandtonschool.co.za</p></div>
-        <div><h5>Follow Us</h5><div class="d-flex gap-3"><a href="#"><i class="bi bi-instagram"></i></a><a href="#"><i class="bi bi-facebook"></i></a><a href="#"><i class="bi bi-youtube"></i></a><a href="#"><i class="bi bi-whatsapp"></i></a></div></div>
-      </div>
-      <div class="credit">&copy; 2026 Sandton School Group. Powered by <a href="https://geekcraftlabs.com" target="_blank">Geekcraft Labs</a></div>
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div><div class="brand">Sandton School Group</div><p class="mt-2">Excellence in Education</p></div>
+      <div><h5>Quick Links</h5><ul class="list-unstyled"><li><a href="index.html">Home</a></li><li><a href="foods.html">Foods</a></li><li><a href="beverages.html">Beverages</a></li><li><a href="ice-cream.html">Ice Creams</a></li></ul></div>
+      <div><h5>Contact</h5><p>📞 +27 11 123 4567</p><p>✉️ info@sandtonschool.co.za</p></div>
+      <div><h5>Follow Us</h5><div class="d-flex gap-3"><a href="#"><i class="bi bi-instagram"></i></a><a href="#"><i class="bi bi-facebook"></i></a><a href="#"><i class="bi bi-youtube"></i></a><a href="#"><i class="bi bi-whatsapp"></i></a></div></div>
     </div>
-  </footer>
+    <div class="credit">&copy; 2026 Sandton School Group. Powered by <a href="https://geekcraftlabs.com" target="_blank">Geekcraft Labs</a></div>
+  </div>
+</footer>
 
-  <script>
-    (function(){ emailjs.init({ publicKey: "EQYdepR-heRjQSlgP" }); })();
+<script>
+  (function(){ emailjs.init({ publicKey: "EQYdepR-heRjQSlgP" }); })();
 
-    (async function() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const code = urlParams.get('code');
-      const pendingOrder = JSON.parse(localStorage.getItem('pendingOrder'));
+  (async function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    const pendingOrder = JSON.parse(localStorage.getItem('pendingOrder'));
 
-      if (!code) {
-        document.getElementById('saving-status').innerHTML = '<p class="text-danger">No order code found. Please contact support.</p>';
-        return;
-      }
+    if (!code) {
+      document.getElementById('saving-status').innerHTML = '<p class="text-danger">No order code found. Please contact support.</p>';
+      return;
+    }
 
-      if (sessionStorage.getItem(`order_${code}_processed`)) {
-        document.getElementById('saving-status').style.display = 'none';
-        document.getElementById('success-content').style.display = 'block';
-        document.getElementById('code-display').textContent = code;
-        return;
-      }
+    if (sessionStorage.getItem(`order_${code}_processed`)) {
+      document.getElementById('saving-status').style.display = 'none';
+      document.getElementById('success-content').style.display = 'block';
+      document.getElementById('code-display').textContent = code;
+      return;
+    }
 
-      if (pendingOrder && pendingOrder.orderNumber) {
-        try {
-          await fetch('/process-payment', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              token: 'redirect_success',
-              amount: Math.round(pendingOrder.total * 100),
-              orderData: pendingOrder
-            })
-          });
-        } catch (err) { console.error(err); }
-      }
+    if (pendingOrder && pendingOrder.orderNumber) {
+      try {
+        await fetch('/process-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            token: 'redirect_success',
+            amount: Math.round(pendingOrder.total * 100),
+            orderData: pendingOrder
+          })
+        });
+      } catch (err) { console.error(err); }
+    }
 
-      if (pendingOrder) {
-        try {
-          const orderItemsHtml = pendingOrder.items.map(i => `<li>${i.qty}x ${i.name} @ R${i.price}</li>`).join('');
-          await emailjs.send("service_acj5qey", "template_39fyana", {
-            customer_email: pendingOrder.contact,
-            customer_name: `${pendingOrder.name} ${pendingOrder.surname}`,
-            order_code: pendingOrder.shortCode,
-            pickup_date: new Date(pendingOrder.pickupDate).toDateString(),
-            order_items_html: orderItemsHtml,
-            total_amount: `R${pendingOrder.total.toFixed(2)}`
-          });
-        } catch (emailError) { console.error(emailError); }
-      }
+    if (pendingOrder) {
+      try {
+        const orderItemsHtml = pendingOrder.items.map(i => `<li>${i.qty}x ${i.name} @ R${i.price}</li>`).join('');
+        await emailjs.send("service_acj5qey", "template_39fyana", {
+          customer_email: pendingOrder.contact,
+          customer_name: `${pendingOrder.name} ${pendingOrder.surname}`,
+          order_code: pendingOrder.shortCode,
+          pickup_date: new Date(pendingOrder.pickupDate).toDateString(),
+          order_items_html: orderItemsHtml,
+          total_amount: `R${pendingOrder.total.toFixed(2)}`
+        });
+      } catch (emailError) { console.error(emailError); }
+    }
 
-      sessionStorage.setItem(`order_${code}_processed`, 'true');
-      localStorage.removeItem('pendingOrder');
-      localStorage.removeItem('ghsCart');
+    sessionStorage.setItem(`order_${code}_processed`, 'true');
+    localStorage.removeItem('pendingOrder');
+    localStorage.removeItem('ghsCart');
 
-      document.getElementById('saving-status').innerHTML = '<p class="text-success">✅ Order confirmed!</p>';
-      setTimeout(() => {
-        document.getElementById('saving-status').style.display = 'none';
-        document.getElementById('success-content').style.display = 'block';
-        document.getElementById('code-display').textContent = code;
-      }, 1000);
-    })();
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    document.getElementById('saving-status').innerHTML = '<p class="text-success">✅ Order confirmed!</p>';
+    setTimeout(() => {
+      document.getElementById('saving-status').style.display = 'none';
+      document.getElementById('success-content').style.display = 'block';
+      document.getElementById('code-display').textContent = code;
+    }, 1000);
+  })();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
