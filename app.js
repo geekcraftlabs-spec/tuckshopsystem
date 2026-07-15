@@ -13,11 +13,9 @@ const jwt = require('jsonwebtoken');
 // ─── Yoco import (with fallback) ────────────────────────────
 let Yoco;
 try {
-  // Use the correct package name (check your installed package)
   Yoco = require('@yoco/sdk');
 } catch (e) {
   console.warn('⚠️ Yoco SDK not found – using mock for development.');
-  // Mock class that returns a fake redirect URL
   Yoco = class YocoMock {
     constructor() {}
     async createTransaction() {
@@ -30,7 +28,7 @@ const app = express();
 
 // ─── Middleware ───────────────────────────────────────────────
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'https://sandton-school-group.vercel.app',
+  origin: process.env.CORS_ORIGIN || 'https://sandtonschoolgroup.vercel.app',
   credentials: true
 }));
 app.use(express.json());
@@ -53,7 +51,7 @@ async function connectToDatabase() {
     return conn;
   } catch (err) {
     console.error('❌ MongoDB connection error:', err.message);
-    throw err; // Will crash the function, but Vercel will retry
+    throw err;
   }
 }
 
@@ -93,6 +91,14 @@ const verifyToken = (req, res, next) => {
   } catch (err) {
     return res.status(401).json({ error: 'Invalid or expired token' });
   }
+};
+
+// ─── Staff role middleware ───────────────────────────────────
+const requireStaff = (req, res, next) => {
+  if (req.user.role !== 'staff' && req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Forbidden – staff only' });
+  }
+  next();
 };
 
 // ─── Helper: generate short code ────────────────────────────
@@ -162,8 +168,8 @@ app.post('/process-payment', verifyToken, async (req, res) => {
   }
 });
 
-// 3. Staff dashboard – get totals for a date (protected)
-app.get('/dashboard', verifyToken, async (req, res) => {
+// 3. Staff dashboard – get totals for a date (protected + staff only)
+app.get('/dashboard', verifyToken, requireStaff, async (req, res) => {
   try {
     await connectToDatabase();
     const date = req.query.date;
@@ -189,8 +195,8 @@ app.get('/dashboard', verifyToken, async (req, res) => {
   }
 });
 
-// 4. Lookup order by short code (protected)
-app.get('/orders/lookup/:code', verifyToken, async (req, res) => {
+// 4. Lookup order by short code (protected + staff only)
+app.get('/orders/lookup/:code', verifyToken, requireStaff, async (req, res) => {
   try {
     await connectToDatabase();
     const code = req.params.code;
@@ -202,8 +208,8 @@ app.get('/orders/lookup/:code', verifyToken, async (req, res) => {
   }
 });
 
-// 5. Mark order as collected (protected)
-app.post('/orders/mark-collected', verifyToken, async (req, res) => {
+// 5. Mark order as collected (protected + staff only)
+app.post('/orders/mark-collected', verifyToken, requireStaff, async (req, res) => {
   try {
     await connectToDatabase();
     const { shortCode } = req.body;
@@ -220,7 +226,6 @@ app.post('/orders/mark-collected', verifyToken, async (req, res) => {
 });
 
 // ─── Export for Vercel (serverless) ──────────────────────────
-// If running locally, start the server
 if (require.main === module) {
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
@@ -228,5 +233,4 @@ if (require.main === module) {
   });
 }
 
-// Export the app for serverless environments (Vercel)
 module.exports = app;
