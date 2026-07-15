@@ -9,17 +9,16 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 </head>
 <body>
- <script>
+<script>
   (function() {
-    // 1. If token is in URL, save it and redirect without the token
+    // 1. If token is in URL, save it and remove from URL
     const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get('token');
-    if (token) {
-      localStorage.setItem('authToken', token);
-      // Remove token from URL and reload cleanly
+    const tokenFromUrl = urlParams.get('token');
+    if (tokenFromUrl) {
+      localStorage.setItem('authToken', tokenFromUrl);
       const newUrl = window.location.pathname + window.location.search.replace(/[?&]token=[^&]*/, '').replace(/^&/, '?');
       window.history.replaceState({}, document.title, newUrl);
-      // Reload page to apply auth state
+      // Reload to apply auth state
       window.location.reload();
       return;
     }
@@ -27,9 +26,17 @@
     // 2. Check if we have a token in localStorage
     const storedToken = localStorage.getItem('authToken');
     if (!storedToken) {
-      // No token – redirect to main site login
-      const returnTo = encodeURIComponent(window.location.href);
-      window.location.href = `https://sandtonschoolgroup.vercel.app/login?returnTo=${returnTo}`;
+      // ❌ No token – show a message and a login button, no redirect!
+      document.body.innerHTML = `
+        <div style="display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;background:#f8f9fa;text-align:center;padding:20px;">
+          <div style="max-width:400px;background:white;padding:40px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.1);">
+            <h2 style="color:#003057;">🔒 Please Log In</h2>
+            <p style="color:#4b5563;margin:16px 0;">You need to be logged in to access the tuckshop.</p>
+            <a href="https://sandtonschoolgroup.vercel.app/login" style="display:inline-block;background:#C41230;color:white;padding:12px 30px;border-radius:50px;text-decoration:none;font-weight:600;">Go to Login</a>
+            <p style="margin-top:16px;font-size:0.8rem;color:#6b7280;">After logging in, come back here.</p>
+          </div>
+        </div>
+      `;
       return;
     }
 
@@ -37,15 +44,34 @@
     try {
       const payload = JSON.parse(atob(storedToken.split('.')[1]));
       if (payload.exp && payload.exp * 1000 < Date.now()) {
-        // Token expired – clear and redirect
         localStorage.removeItem('authToken');
-        window.location.href = 'https://sandtonschoolgroup.vercel.app/login';
+        document.body.innerHTML = `
+          <div style="display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;background:#f8f9fa;text-align:center;padding:20px;">
+            <div style="max-width:400px;background:white;padding:40px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.1);">
+              <h2 style="color:#003057;">⏰ Session Expired</h2>
+              <p style="color:#4b5563;margin:16px 0;">Your session has expired. Please log in again.</p>
+              <a href="https://sandtonschoolgroup.vercel.app/login" style="display:inline-block;background:#C41230;color:white;padding:12px 30px;border-radius:50px;text-decoration:none;font-weight:600;">Log In Again</a>
+            </div>
+          </div>
+        `;
+        return;
       }
     } catch (e) {
-      // Invalid token – clear and redirect
       localStorage.removeItem('authToken');
-      window.location.href = 'https://sandtonschoolgroup.vercel.app/login';
+      document.body.innerHTML = `
+        <div style="display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;background:#f8f9fa;text-align:center;padding:20px;">
+          <div style="max-width:400px;background:white;padding:40px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.1);">
+            <h2 style="color:#003057;">⚠️ Invalid Session</h2>
+            <p style="color:#4b5563;margin:16px 0;">Your login token is invalid. Please log in again.</p>
+            <a href="https://sandtonschoolgroup.vercel.app/login" style="display:inline-block;background:#C41230;color:white;padding:12px 30px;border-radius:50px;text-decoration:none;font-weight:600;">Log In</a>
+          </div>
+        </div>
+      `;
+      return;
     }
+
+    // 4. Token exists and is valid – proceed with the page.
+    console.log('✅ Authenticated');
   })();
 </script>
 
