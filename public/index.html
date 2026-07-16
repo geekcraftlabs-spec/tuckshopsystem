@@ -11,22 +11,17 @@
 <body>
 <script>
   (function() {
-    // 1. If token is in URL, save it and remove from URL
     const urlParams = new URLSearchParams(window.location.search);
     const tokenFromUrl = urlParams.get('token');
     if (tokenFromUrl) {
       localStorage.setItem('authToken', tokenFromUrl);
       const newUrl = window.location.pathname + window.location.search.replace(/[?&]token=[^&]*/, '').replace(/^&/, '?');
       window.history.replaceState({}, document.title, newUrl);
-      // Reload to apply auth state
       window.location.reload();
       return;
     }
-
-    // 2. Check if we have a token in localStorage
     const storedToken = localStorage.getItem('authToken');
     if (!storedToken) {
-      // ❌ No token – show a message and a login button, no redirect!
       document.body.innerHTML = `
         <div style="display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;background:#f8f9fa;text-align:center;padding:20px;">
           <div style="max-width:400px;background:white;padding:40px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.1);">
@@ -39,8 +34,6 @@
       `;
       return;
     }
-
-    // 3. Optional: validate token expiry
     try {
       const payload = JSON.parse(atob(storedToken.split('.')[1]));
       if (payload.exp && payload.exp * 1000 < Date.now()) {
@@ -69,15 +62,10 @@
       `;
       return;
     }
-
-    // 4. Token exists and is valid – proceed with the page.
     console.log('✅ Authenticated');
   })();
 </script>
 
-<!-- ============================================
-     HEADER – Sandton School Group Brand
-     ============================================ -->
 <style>
   :root {
     --primary-navy: #003057;
@@ -180,14 +168,16 @@
       <a href="foods.html" class="nav__link" id="navFoods">Foods</a>
       <a href="beverages.html" class="nav__link" id="navBeverages">Beverages</a>
       <a href="ice-cream.html" class="nav__link" id="navIceCream">Ice Creams</a>
-      <button class="cart-btn" id="cartBtn" aria-label="Cart">
+      <button class="cart-btn" id="cartBtn" onclick="window.location.href='cart.html'">
         🛒 <span class="cart-badge" id="cartBadge">0</span>
       </button>
       <div class="auth-status logged-out" id="authStatus">
         <span id="authText">Not logged in</span>
-        <a href="https://sandtonschoolgroup.vercel.app/login" class="logout-link" id="authAction">Log In</a>
+        <a href="#" class="logout-link" id="authAction">Log In</a>
       </div>
       <a href="https://sandtonschoolgroup.vercel.app/subscribe" class="btn-cta btn-cta--primary">Subscribe</a>
+      <!-- ✅ Return to Main button -->
+      <a href="https://sandtonschoolgroup.vercel.app/dashboard" target="_blank" rel="noopener noreferrer" class="bg-[#C41230] text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-[#a00e27] transition whitespace-nowrap" style="font-family: 'Inter', sans-serif; text-decoration: none; display: inline-block;">← Return to Main</a>
     </nav>
     <button class="hamburger" id="hamburger" aria-label="Toggle menu">
       <span></span><span></span><span></span>
@@ -207,6 +197,8 @@
     <a href="https://sandtonschoolgroup.vercel.app/login" class="mobile-menu__link" id="mobileAuthLink">🔐 Log In</a>
   </div>
   <a href="https://sandtonschoolgroup.vercel.app/subscribe" class="mobile-menu__link" style="color: var(--action-red); font-weight: 600;">Subscribe Now →</a>
+  <!-- ✅ Return to Main (mobile) -->
+  <a href="https://sandtonschoolgroup.vercel.app/dashboard" target="_blank" rel="noopener noreferrer" class="mobile-menu__link" style="background: #C41230; color: white; border-radius: 50px; justify-content: center; margin-top: 8px;">← Return to Main</a>
 </div>
 
 <script>
@@ -352,7 +344,6 @@
 <footer class="footer">
   <div class="container">
     <div class="footer-grid">
-      <!-- Brand + Logo -->
       <div>
         <div class="brand">
           <img src="mainlogo.png" alt="Sandton School Group" style="height: 40px; margin-bottom: 8px;" />
@@ -361,8 +352,6 @@
         </div>
         <p class="mt-2">Excellence in Education</p>
       </div>
-
-      <!-- Quick Links -->
       <div>
         <h5>Quick Links</h5>
         <ul class="list-unstyled">
@@ -372,8 +361,6 @@
           <li><a href="ice-cream.html">Ice Creams</a></li>
         </ul>
       </div>
-
-      <!-- Contact (clickable) -->
       <div>
         <h5>Contact</h5>
         <p>
@@ -388,8 +375,6 @@
         </p>
         <p>📍 123 Sandton Drive, Johannesburg</p>
       </div>
-
-      <!-- Social -->
       <div>
         <h5>Follow Us</h5>
         <div class="d-flex gap-3">
@@ -403,10 +388,7 @@
         </p>
       </div>
     </div>
-
-    <div class="credit">
-      &copy; 2026 Sandton School Group. All rights reserved.
-    </div>
+    <div class="credit">&copy; 2026 Sandton School Group. All rights reserved.</div>
   </div>
 </footer>
 

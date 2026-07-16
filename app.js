@@ -1,6 +1,7 @@
 // ============================================================
 // app.js – Tuckshop Backend (Express + MongoDB)
 // SSO JWT validation, serverless-ready for Vercel
+// WITH AUTO-HEADER INJECTION – No manual HTML editing needed
 // ============================================================
 
 require('dotenv').config();
@@ -9,6 +10,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
 const jwt = require('jsonwebtoken');
+const fs = require('fs');
 
 // ─── Yoco import (with fallback) ────────────────────────────
 let Yoco;
@@ -33,6 +35,53 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// ─── HEADER INJECTION MIDDLEWARE ─────────────────────────────
+// This loads header.html once and injects it into every HTML response
+// No need to manually edit any HTML files!
+let headerHtml = '';
+try {
+  headerHtml = fs.readFileSync(path.join(__dirname, 'header.html'), 'utf8');
+  console.log('✅ Header loaded successfully');
+} catch (err) {
+  console.warn('⚠️ header.html not found – serving pages without header.');
+}
+
+app.use((req, res, next) => {
+  // Only process GET requests for HTML pages
+  if (req.method !== 'GET') return next();
+  if (!req.path.endsWith('.html') && req.path !== '/') return next();
+
+  // Determine the file path
+  let filePath = req.path === '/' ? '/index.html' : req.path;
+  filePath = path.join(__dirname, 'public', filePath);
+
+  // Check if file exists
+  if (!fs.existsSync(filePath)) return next();
+
+  // Read and inject header
+  fs.readFile(filePath, 'utf8', (err, data) => {
+    if (err) return next();
+
+    let modified = data;
+    if (headerHtml) {
+      // Find the first <body> tag (case-insensitive)
+      const bodyTagMatch = modified.match(/<body[^>]*>/i);
+      if (bodyTagMatch) {
+        const bodyTag = bodyTagMatch[0];
+        // Insert headerHtml right after the body tag
+        modified = modified.replace(bodyTag, bodyTag + '\n' + headerHtml);
+      } else {
+        // If no <body> tag, prepend header
+        modified = headerHtml + modified;
+      }
+    }
+
+    res.send(modified);
+  });
+});
+
+// ─── Static files (AFTER injection middleware) ──────────────
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ─── MongoDB Connection (cached for serverless) ──────────────
