@@ -9,24 +9,20 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 </head>
 <body>
+
 <script>
   (function() {
-    // 1. If token is in URL, save it and remove from URL
     const urlParams = new URLSearchParams(window.location.search);
     const tokenFromUrl = urlParams.get('token');
     if (tokenFromUrl) {
       localStorage.setItem('authToken', tokenFromUrl);
       const newUrl = window.location.pathname + window.location.search.replace(/[?&]token=[^&]*/, '').replace(/^&/, '?');
       window.history.replaceState({}, document.title, newUrl);
-      // Reload to apply auth state
       window.location.reload();
       return;
     }
-
-    // 2. Check if we have a token in localStorage
     const storedToken = localStorage.getItem('authToken');
     if (!storedToken) {
-      // ❌ No token – show a message and a login button, no redirect!
       document.body.innerHTML = `
         <div style="display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;background:#f8f9fa;text-align:center;padding:20px;">
           <div style="max-width:400px;background:white;padding:40px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.1);">
@@ -39,8 +35,6 @@
       `;
       return;
     }
-
-    // 3. Optional: validate token expiry
     try {
       const payload = JSON.parse(atob(storedToken.split('.')[1]));
       if (payload.exp && payload.exp * 1000 < Date.now()) {
@@ -69,15 +63,10 @@
       `;
       return;
     }
-
-    // 4. Token exists and is valid – proceed with the page.
     console.log('✅ Authenticated');
   })();
 </script>
 
-<!-- ============================================
-     HEADER – Same as before (no active link)
-     ============================================ -->
 <style>
   :root {
     --primary-navy: #003057;
@@ -105,26 +94,70 @@
     transition: background 0.3s, box-shadow 0.3s;
   }
   .header.scrolled { background: rgba(255,255,255,0.97); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-  .header__inner { max-width: 1200px; width: 100%; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; }
+  .header__inner {
+    max-width: 1200px; width: 100%; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
   .logo { display: flex; align-items: center; gap: 12px; flex-shrink: 0; text-decoration: none; }
   .logo__img { width: 44px; height: 44px; object-fit: contain; }
   .logo__text { display: flex; flex-direction: column; line-height: 1.2; }
   .logo__brand { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; color: var(--primary-navy); letter-spacing: -0.01em; }
   .logo__tagline { font-size: 0.6rem; font-weight: 500; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.15em; }
-  .nav { display: flex; align-items: center; gap: 24px; }
-  .nav__link { font-size: 0.875rem; font-weight: 500; color: var(--gray-600); padding: 6px 0; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; text-decoration: none; }
+  .nav { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .nav__link { font-size: 0.875rem; font-weight: 500; color: var(--gray-600); padding: 6px 0; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; text-decoration: none; white-space: nowrap; }
   .nav__link:hover, .nav__link.active { color: var(--primary-navy); border-bottom-color: var(--action-red); }
   .cart-btn { position: relative; width: 40px; height: 40px; background: transparent; border: none; cursor: pointer; font-size: 1.3rem; color: var(--gray-700); border-radius: var(--radius-full); transition: background 0.2s; display: flex; align-items: center; justify-content: center; }
   .cart-btn:hover { background: var(--gray-100); }
   .cart-badge { position: absolute; top: -4px; right: -4px; min-width: 20px; height: 20px; padding: 0 6px; font-size: 0.65rem; font-weight: 700; background: var(--action-red); color: #fff; border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; line-height: 1; }
-  .auth-status { font-size: 0.8rem; font-weight: 500; padding: 6px 16px; border-radius: var(--radius-full); border: 1px solid #e2e8f0; background: #fff; transition: all 0.2s; }
+  .auth-status { font-size: 0.8rem; font-weight: 500; padding: 6px 16px; border-radius: var(--radius-full); border: 1px solid #e2e8f0; background: #fff; transition: all 0.2s; white-space: nowrap; }
   .auth-status.logged-in { border-color: #22c55e; color: #15803d; }
   .auth-status.logged-out { border-color: #cbd5e1; color: var(--gray-600); }
   .auth-status .logout-link { margin-left: 8px; color: var(--action-red); font-weight: 600; cursor: pointer; }
   .auth-status .logout-link:hover { text-decoration: underline; }
-  .btn-cta { font-size: 0.8rem; font-weight: 600; padding: 10px 24px; border-radius: var(--radius-full); border: none; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block; }
-  .btn-cta--primary { background: var(--action-red); color: #fff; box-shadow: 0 4px 14px rgba(196,18,48,0.25); }
-  .btn-cta--primary:hover { background: #a00f27; transform: scale(1.02); }
+
+  .btn-cta {
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 10px 24px;
+    border-radius: var(--radius-full);
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-block;
+    white-space: nowrap;
+  }
+  .btn-cta--primary {
+    background: var(--action-red);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(196,18,48,0.25);
+  }
+  .btn-cta--primary:hover {
+    background: #a00f27;
+    transform: scale(1.02);
+  }
+
+  .btn-return {
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 10px 24px;
+    border-radius: var(--radius-full);
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-block;
+    white-space: nowrap;
+    background: var(--primary-navy);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(0,48,87,0.25);
+  }
+  .btn-return:hover {
+    background: #001a30;
+    transform: scale(1.02);
+    color: #fff;
+  }
+
   .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 6px; }
   .hamburger span { display: block; width: 24px; height: 2px; background: var(--gray-900); border-radius: 2px; transition: all 0.2s; }
   .hamburger.open span:nth-child(1) { transform: rotate(45deg) translateY(7px); }
@@ -137,13 +170,13 @@
   .mobile-menu__link .badge { font-size: 0.7rem; background: var(--action-red); color: #fff; padding: 2px 10px; border-radius: var(--radius-full); }
   .mobile-menu__divider { height: 1px; background: #e2e8f0; margin: 8px 0; }
   @media (max-width: 992px) { .nav { display: none; } .hamburger { display: flex; } .header__inner { padding: 0 16px; } .logo__brand { font-size: 1.1rem; } .logo__tagline { font-size: 0.5rem; } }
-  @media (max-width: 480px) { .logo__img { width: 36px; height: 36px; } .logo__brand { font-size: 0.95rem; } .btn-cta { font-size: 0.75rem; padding: 8px 16px; } .auth-status { font-size: 0.7rem; padding: 4px 12px; } }
+  @media (max-width: 480px) { .logo__img { width: 36px; height: 36px; } .logo__brand { font-size: 0.95rem; } .btn-cta, .btn-return { font-size: 0.7rem; padding: 6px 14px; } .auth-status { font-size: 0.7rem; padding: 4px 10px; } }
 </style>
 
 <header class="header" id="header">
   <div class="header__inner">
     <a href="index.html" class="logo">
-      <img src="/images/mainlogo.png" alt="Sandton School Group" class="logo__img" />
+      <img src="mainlogo.png" alt="Sandton School Group" class="logo__img" />
       <div class="logo__text">
         <span class="logo__brand">Sandton Tuckshop</span>
         <span class="logo__tagline">Est. 2002 • Excellence in Education</span>
@@ -157,10 +190,16 @@
       <button class="cart-btn" id="cartBtn" onclick="window.location.href='cart.html'">
         🛒 <span class="cart-badge" id="cartBadge">0</span>
       </button>
-      <div class="auth-status logged-out" id="authStatus"><span id="authText">Not logged in</span><a href="#" class="logout-link" id="authAction">Log In</a></div>
+      <div class="auth-status logged-out" id="authStatus">
+        <span id="authText">Not logged in</span>
+        <a href="#" class="logout-link" id="authAction">Log In</a>
+      </div>
       <a href="https://sandtonschoolgroup.vercel.app/subscribe" class="btn-cta btn-cta--primary">Subscribe</a>
+      <a href="https://sandtonschoolgroup.vercel.app/dashboard" target="_blank" rel="noopener noreferrer" class="btn-return">← Return</a>
     </nav>
-    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </header>
 
@@ -172,8 +211,11 @@
   <div class="mobile-menu__divider"></div>
   <a href="cart.html" class="mobile-menu__link">🛒 Cart <span class="badge" id="mobileCartBadge">0</span></a>
   <div class="mobile-menu__divider"></div>
-  <div id="mobileAuth"><a href="https://sandtonschoolgroup.vercel.app/login" class="mobile-menu__link" id="mobileAuthLink">🔐 Log In</a></div>
+  <div id="mobileAuth">
+    <a href="https://sandtonschoolgroup.vercel.app/login" class="mobile-menu__link" id="mobileAuthLink">🔐 Log In</a>
+  </div>
   <a href="https://sandtonschoolgroup.vercel.app/subscribe" class="mobile-menu__link" style="color: var(--action-red); font-weight: 600;">Subscribe Now →</a>
+  <a href="https://sandtonschoolgroup.vercel.app/dashboard" target="_blank" rel="noopener noreferrer" class="mobile-menu__link" style="background: var(--primary-navy); color: white; border-radius: 50px; justify-content: center; margin-top: 8px; font-weight: 600;">← Return to Main</a>
 </div>
 
 <script>
@@ -190,11 +232,18 @@
 
     function updateCartCount() {
       let count = 0;
-      try { const cart = JSON.parse(localStorage.getItem('ghsCart') || '[]'); count = cart.reduce((s,i) => s + (i.qty||0), 0); } catch(_) {}
-      cartBadge.textContent = count;
-      mobileCartBadge.textContent = count;
-      cartBadge.style.display = count > 0 ? 'flex' : 'none';
-      mobileCartBadge.style.display = count > 0 ? 'inline' : 'none';
+      try {
+        const cart = JSON.parse(localStorage.getItem('ghsCart') || '[]');
+        count = cart.reduce((sum, item) => sum + (item.qty || 0), 0);
+      } catch(_) {}
+      if (cartBadge) {
+        cartBadge.textContent = count;
+        cartBadge.style.display = count > 0 ? 'flex' : 'none';
+      }
+      if (mobileCartBadge) {
+        mobileCartBadge.textContent = count;
+        mobileCartBadge.style.display = count > 0 ? 'inline' : 'none';
+      }
     }
 
     function updateAuth() {
@@ -213,10 +262,18 @@
         authText.textContent = '👋 ' + userName;
         authAction.textContent = 'Logout';
         authAction.href = '#';
-        authAction.onclick = function(e) { e.preventDefault(); localStorage.removeItem('authToken'); window.location.reload(); };
+        authAction.onclick = function(e) {
+          e.preventDefault();
+          localStorage.removeItem('authToken');
+          window.location.reload();
+        };
         mobileAuthLink.innerHTML = '👋 ' + userName + ' (Logout)';
         mobileAuthLink.href = '#';
-        mobileAuthLink.onclick = function(e) { e.preventDefault(); localStorage.removeItem('authToken'); window.location.reload(); };
+        mobileAuthLink.onclick = function(e) {
+          e.preventDefault();
+          localStorage.removeItem('authToken');
+          window.location.reload();
+        };
       } else {
         authStatus.className = 'auth-status logged-out';
         authText.textContent = 'Not logged in';
@@ -229,34 +286,59 @@
       }
     }
 
-    hamburger.addEventListener('click', function() {
-      const isOpen = hamburger.classList.toggle('open');
-      mobileMenu.classList.toggle('open');
-      document.body.style.overflow = isOpen ? 'hidden' : '';
-    });
-    mobileMenu.querySelectorAll('a').forEach(function(link) {
-      link.addEventListener('click', function() {
-        hamburger.classList.remove('open');
-        mobileMenu.classList.remove('open');
-        document.body.style.overflow = '';
+    if (hamburger) {
+      hamburger.addEventListener('click', function() {
+        const isOpen = hamburger.classList.toggle('open');
+        mobileMenu.classList.toggle('open');
+        document.body.style.overflow = isOpen ? 'hidden' : '';
       });
-    });
+    }
+    if (mobileMenu) {
+      mobileMenu.querySelectorAll('a').forEach(function(link) {
+        link.addEventListener('click', function() {
+          if (hamburger) hamburger.classList.remove('open');
+          mobileMenu.classList.remove('open');
+          document.body.style.overflow = '';
+        });
+      });
+    }
+
     window.addEventListener('scroll', function() {
       if (window.scrollY > 20) header.classList.add('scrolled');
       else header.classList.remove('scrolled');
     });
 
+    function setActiveLink() {
+      const current = window.location.pathname.split('/').pop() || 'index.html';
+      const links = {
+        'index.html': ['navHome','mobHome'],
+        'foods.html': ['navFoods','mobFoods'],
+        'beverages.html': ['navBeverages','mobBeverages'],
+        'ice-cream.html': ['navIceCream','mobIceCream'],
+        'cart.html': ['navCart','mobCart']
+      };
+      const ids = links[current];
+      if (ids) {
+        ids.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.classList.add('active');
+        });
+      }
+    }
+
     updateCartCount();
     updateAuth();
+    setActiveLink();
+
+    window.addEventListener('cartUpdated', updateCartCount);
+
     window.addEventListener('storage', function(e) {
       if (e.key === 'ghsCart') updateCartCount();
       if (e.key === 'authToken') updateAuth();
     });
     window.addEventListener('focus', updateAuth);
 
-    // ===========================================================
-    // STAFF DASHBOARD PROTECTION – Client side role check
-    // ===========================================================
+    // ─── STAFF DASHBOARD PROTECTION ───────────────────────────
     (function protectDashboard() {
       const token = localStorage.getItem('authToken');
       if (!token) {
@@ -270,7 +352,6 @@
           window.location.href = 'https://sandtonschoolgroup.vercel.app/dashboard';
           return;
         }
-        // Show staff name
         document.getElementById('staffName').textContent = payload.studentName || 'Staff';
         console.log('✅ Staff access granted:', payload.email);
       } catch (e) {
@@ -282,9 +363,7 @@
   })();
 </script>
 
-<!-- ============================================
-     STAFF DASHBOARD CONTENT
-     ============================================ -->
+<!-- STAFF DASHBOARD CONTENT -->
 <div class="container my-5" style="padding-top: 20px;">
   <h1 class="section-title">Staff Dashboard</h1>
   <p>Welcome, <strong id="staffName">Staff</strong>!</p>
@@ -330,7 +409,7 @@
         <div class="brand">
           <img src="mainlogo.png" alt="Sandton School Group" style="height: 40px; margin-bottom: 8px;" />
           <br />
-          <span style="font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--white);">Sandton School Group</span>
+          <span style="font-family: 'Playfair Display', serif; font-size: 1.8rem; color: #fff;">Sandton School Group</span>
         </div>
         <p class="mt-2">Excellence in Education</p>
       </div>
@@ -375,9 +454,7 @@
 </footer>
 
 <script>
-  // ---- Dashboard logic ----
   const token = localStorage.getItem('authToken');
-  // Token already checked in the header script, but we also need it for API calls
 
   const dateInput = document.getElementById('selectedDate');
   dateInput.valueAsDate = new Date();
@@ -422,7 +499,6 @@
   setInterval(loadTotals, 30000);
   dateInput.addEventListener('change', loadTotals);
 
-  // Lookup
   document.getElementById('lookup-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const code = document.getElementById('orderCode').value.trim();
