@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 </head>
 <body>
+
 <script>
   (function() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -156,6 +157,7 @@
   .btn-return:hover {
     background: #001a30;
     transform: scale(1.02);
+    color: #fff; /* keep white on hover */
   }
 
   .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 6px; }
@@ -195,7 +197,6 @@
         <a href="#" class="logout-link" id="authAction">Log In</a>
       </div>
       <a href="https://sandtonschoolgroup.vercel.app/subscribe" class="btn-cta btn-cta--primary">Subscribe</a>
-      <!-- ✅ Return button added -->
       <a href="https://sandtonschoolgroup.vercel.app/dashboard" target="_blank" rel="noopener noreferrer" class="btn-return">← Return</a>
     </nav>
     <button class="hamburger" id="hamburger" aria-label="Toggle menu">
@@ -216,7 +217,6 @@
     <a href="https://sandtonschoolgroup.vercel.app/login" class="mobile-menu__link" id="mobileAuthLink">🔐 Log In</a>
   </div>
   <a href="https://sandtonschoolgroup.vercel.app/subscribe" class="mobile-menu__link" style="color: var(--action-red); font-weight: 600;">Subscribe Now →</a>
-  <!-- ✅ Return button (mobile) -->
   <a href="https://sandtonschoolgroup.vercel.app/dashboard" target="_blank" rel="noopener noreferrer" class="mobile-menu__link" style="background: var(--primary-navy); color: white; border-radius: 50px; justify-content: center; margin-top: 8px; font-weight: 600;">← Return to Main</a>
 </div>
 
